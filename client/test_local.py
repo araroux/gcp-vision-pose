@@ -1,13 +1,17 @@
 import base64
 import requests
 import os
+from dotenv import load_dotenv
+load_dotenv()
 
-# --- 設定 ---
-# あなたのCloud RunのURLに書き換えてください
-API_URL = "https://my-vision-service-593396693760.asia-northeast1.run.app"
+API_URL = os.environ.get(
+    "VISION_API_URL",
+    "http://localhost:8080"
+)
+print("Using API_URL =", API_URL)
+
 # テストする画像ファイル名 (同じフォルダに置いてください)
-#IMAGE_FILE = "my_photo.jpg" 
-IMAGE_FILE = "my_face.jpg" 
+IMAGE_FILE = "image01.jpg" 
 
 # モード: label, ocr, face
 #MODE = "label" 

@@ -1,11 +1,15 @@
+import os
 import tkinter as tk
 from tkinter import messagebox
 import requests
+from dotenv import load_dotenv
+load_dotenv()
 
-# ==========================================
-# ここに Cloud Run の URL を貼り付けてください
-# ==========================================
-API_URL = "https://my-vision-service-593396693760.asia-northeast1.run.app"
+API_URL = os.environ.get(
+    "VISION_API_URL",
+    "http://localhost:8080"
+)
+print("Using API_URL =", API_URL)
 
 def analyze_image():
     # 1. 入力された画像URLを取得

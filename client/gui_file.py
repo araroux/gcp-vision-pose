@@ -1,13 +1,17 @@
+import os
 import tkinter as tk
 from tkinter import filedialog, messagebox, Radiobutton, IntVar
 import requests
 import base64
 from PIL import Image, ImageTk  # pip install Pillow が必要
+from dotenv import load_dotenv
+load_dotenv()
 
-# ==========================================
-# 設定: あなたのCloud Run URLに書き換えてください
-# ==========================================
-API_URL = "https://my-vision-service-593396693760.asia-northeast1.run.app"
+API_URL = os.environ.get(
+    "VISION_API_URL",
+    "http://localhost:8080"
+)
+print("Using API_URL =", API_URL)
 
 class VisionApp:
     def __init__(self, root):
