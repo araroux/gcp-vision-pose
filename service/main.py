@@ -1,3 +1,9 @@
+"""
+Requires:
+- Google Cloud SDK installed
+- `gcloud auth login` executed
+"""
+
 import os
 import base64
 import requests

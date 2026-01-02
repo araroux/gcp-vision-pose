@@ -4,6 +4,7 @@ my_*.png
 *.jpg
 *.jpeg
 *.png
+.env
 
 # Python cache
 __pycache__/

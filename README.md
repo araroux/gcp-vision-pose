@@ -10,6 +10,13 @@ Supported modes:
 ## Architecture
 client (GUI/CLI) -> Cloud Run (Flask + gunicorn) -> Google Cloud Vision API
 
+## Authentication
+
+This service is deployed on Cloud Run with authentication enabled.
+Clients must attach a valid Google Cloud ID token.
+
+Unauthenticated requests will be rejected (403).
+
 ## API
 ### Endpoint
 - `POST /`
