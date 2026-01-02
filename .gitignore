@@ -1,0 +1,10 @@
+# Personal / local files
+my_*.jpg
+my_*.png
+*.jpg
+*.jpeg
+*.png
+
+# Python cache
+__pycache__/
+*.pyc
