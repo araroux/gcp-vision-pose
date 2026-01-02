@@ -6,6 +6,7 @@ import base64
 from PIL import Image, ImageTk  # pip install Pillow が必要
 from dotenv import load_dotenv
 load_dotenv()
+from auth import auth_headers   # 認証ヘッダー取得関数
 
 API_URL = os.environ.get(
     "VISION_API_URL",
@@ -96,7 +97,7 @@ class VisionApp:
             }
 
             # 送信
-            response = requests.post(API_URL, json=payload)
+            response = requests.post(API_URL, json=payload, headers=auth_headers())
             
             if response.status_code == 200:
                 data = response.json()

@@ -4,45 +4,37 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
-API_URL = os.environ.get(
-    "VISION_API_URL",
-    "http://localhost:8080"
-)
+from auth import auth_headers   # 認証ヘッダー取得関数
+
+API_URL = os.environ.get("VISION_API_URL", "http://localhost:8080").strip()
 print("Using API_URL =", API_URL)
 
-# テストする画像ファイル名 (同じフォルダに置いてください)
-IMAGE_FILE = "image01.jpg" 
+# 実行場所に依存しないようにする（おすすめ）
+BASE_DIR = os.path.dirname(__file__)
+IMAGE_FILE = os.path.join(BASE_DIR, "my_face.jpg")
 
-# モード: label, ocr, face
-#MODE = "label" 
-#MODE = "ocr" 
-MODE = "face" 
+MODE = "face"  # label / ocr / face
 
 def main():
-    # 1. ローカルの画像ファイルを読み込んでBase64に変換
     if not os.path.exists(IMAGE_FILE):
         print(f"エラー: {IMAGE_FILE} が見つかりません。")
         return
 
     with open(IMAGE_FILE, "rb") as image_file:
-        # バイナリを読み込んでBase64文字列に変換
-        base64_data = base64.b64encode(image_file.read()).decode('utf-8')
+        base64_data = base64.b64encode(image_file.read()).decode("utf-8")
 
-    # 2. サーバーに送信 (URLではなく、image_base64を送る)
-    payload = {
-        "image_base64": base64_data,
-        "mode": MODE
-    }
+    payload = {"image_base64": base64_data, "mode": MODE}
 
     print(f"画像を送信中... ({MODE}モード)")
     try:
-        response = requests.post(API_URL, json=payload)
-        
+        # ★ここが重要：headers を付ける
+        response = requests.post(API_URL, json=payload, headers=auth_headers(), timeout=30)
+
         if response.status_code == 200:
             data = response.json()
             print("\n--- 判定結果 ---")
-            for item in data.get('results', []):
-                print(f"・{item['description']} ({item['score']})")
+            for item in data.get("results", []):
+                print(f"・{item.get('description','')} ({item.get('score','')})")
         else:
             print(f"エラー: {response.status_code}")
             print(response.text)
