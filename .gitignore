@@ -1,10 +1,11 @@
 # Personal / local files
-my_*.jpg
-my_*.png
 *.jpg
 *.jpeg
 *.png
 .env
+
+# Track a reproducible sample image (if you re-enable ignore above)
+# !service/test.jpg
 
 # Python cache
 __pycache__/

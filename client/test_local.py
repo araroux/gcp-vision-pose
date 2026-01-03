@@ -3,8 +3,7 @@ import requests
 import os
 from dotenv import load_dotenv
 load_dotenv()
-
-from auth import auth_headers   # 認証ヘッダー取得関数
+from client.auth import auth_headers
 
 API_URL = os.environ.get("VISION_API_URL", "http://localhost:8080").strip()
 print("Using API_URL =", API_URL)

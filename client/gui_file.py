@@ -6,7 +6,7 @@ import base64
 from PIL import Image, ImageTk  # pip install Pillow が必要
 from dotenv import load_dotenv
 load_dotenv()
-from auth import auth_headers   # 認証ヘッダー取得関数
+from client.auth import auth_headers
 
 API_URL = os.environ.get(
     "VISION_API_URL",
