@@ -1,4 +1,4 @@
-# GCP Vision API PoC (Cloud Run + Simple Clients)
+# GCP Pose Landmark PoC (Cloud Run + Simple Clients)
 
 ## Overview
 
@@ -9,7 +9,7 @@ It focuses on detecting body and face landmark coordinates
 while keeping the same Cloud Run authentication and deployment design.
 
 ## Architecture
-client (GUI/CLI) -> Cloud Run (Flask + gunicorn) -> Google Cloud Vision API
+client -> Cloud Run (Flask+gunicorn) -> MediaPipe Pose
 
 ## Authentication
 

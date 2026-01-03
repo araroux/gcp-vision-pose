@@ -1,3 +1,6 @@
-Flask==3.0.0
-google-cloud-vision==3.4.0
-gunicorn==21.2.0
+flask
+gunicorn
+requests
+numpy
+opencv-python-headless
+mediapipe==0.10.14
