@@ -1,11 +1,12 @@
 # GCP Vision API PoC (Cloud Run + Simple Clients)
 
 ## Overview
-A minimal PoC that exposes Google Cloud Vision API features via a Cloud Run endpoint.
-Supported modes:
-- `label`: label detection
-- `ocr`: text detection (OCR)
-- `face`: face detection (joy likelihood + detection confidence)
+
+This repository is derived from `gcp-vision-test`.
+
+It focuses on detecting body and face landmark coordinates
+(e.g. pose keypoints, facial landmarks),
+while keeping the same Cloud Run authentication and deployment design.
 
 ## Architecture
 client (GUI/CLI) -> Cloud Run (Flask + gunicorn) -> Google Cloud Vision API
