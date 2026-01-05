@@ -1,6 +1,6 @@
 import os
 import tkinter as tk
-from tkinter import filedialog, messagebox, Radiobutton, IntVar
+from tkinter import filedialog, messagebox
 import requests
 import base64
 from PIL import Image, ImageTk  # pip install Pillow が必要
@@ -12,20 +12,20 @@ API_URL = os.environ.get(
     "VISION_API_URL",
     "http://localhost:8080"
 )
+DETECT_ENDPOINT = f"{API_URL}/detect"
 print("Using API_URL =", API_URL)
 
-class VisionApp:
+class PoseDetectionApp:
     def __init__(self, root):
         self.root = root
-        self.root.title("GCP Vision AI アプリ (最終版)")
-        self.root.geometry("500x650")
+        self.root.title("Pose Landmark Detection")
+        self.root.geometry("500x550")
 
         # 変数
         self.file_path = None
-        self.mode_var = IntVar(value=0) # 0:Label, 1:OCR, 2:Face
 
         # --- UI配置 ---
-        
+
         # 1. 画像選択エリア
         self.btn_select = tk.Button(root, text="画像ファイルを選択", command=self.select_image, bg="#f0f0f0")
         self.btn_select.pack(pady=10)
@@ -34,22 +34,11 @@ class VisionApp:
         self.lbl_preview = tk.Label(root, text="画像が選択されていません", bg="#cccccc", width=50, height=15)
         self.lbl_preview.pack(pady=5)
 
-        # 2. モード選択エリア
-        frame_mode = tk.Frame(root)
-        frame_mode.pack(pady=10)
-        tk.Label(frame_mode, text="AIモード: ").pack(side=tk.LEFT)
-        
-        modes = [("物体認識(Label)", "label"), ("文字読取(OCR)", "ocr"), ("顔診断(Face)", "face")]
-        self.mode_map = ["label", "ocr", "face"] # インデックス対応用
-        
-        for i, (text, mode_key) in enumerate(modes):
-            Radiobutton(frame_mode, text=text, variable=self.mode_var, value=i).pack(side=tk.LEFT, padx=5)
-
-        # 3. 実行ボタン
-        self.btn_send = tk.Button(root, text="AI分析開始", command=self.analyze_image, bg="#007acc", fg="white", font=("bold", 12))
+        # 2. 実行ボタン
+        self.btn_send = tk.Button(root, text="姿勢検出を開始", command=self.analyze_image, bg="#007acc", fg="white", font=("bold", 12))
         self.btn_send.pack(pady=10, fill=tk.X, padx=50)
 
-        # 4. 結果表示エリア
+        # 3. 結果表示エリア
         self.result_text = tk.Text(root, height=15, width=60)
         self.result_text.pack(pady=10, padx=10)
 
@@ -60,7 +49,7 @@ class VisionApp:
             self.file_path = file_path
             self.show_preview(file_path)
             self.result_text.delete("1.0", tk.END)
-            self.result_text.insert(tk.END, "画像を選択しました。モードを選んで「AI分析開始」を押してください。")
+            self.result_text.insert(tk.END, "画像を選択しました。「姿勢検出を開始」を押してください。")
 
     def show_preview(self, path):
         # 画像をGUIに表示できるサイズにリサイズして表示
@@ -77,12 +66,9 @@ class VisionApp:
             messagebox.showwarning("警告", "まずは画像を選択してください！")
             return
 
-        # 選択されたモードを取得
-        selected_mode = self.mode_map[self.mode_var.get()]
-
         self.btn_send['state'] = 'disabled'
         self.result_text.delete("1.0", tk.END)
-        self.result_text.insert(tk.END, f"AIに送信中... (モード: {selected_mode})\n")
+        self.result_text.insert(tk.END, "APIに送信中...\n")
         self.root.update()
 
         try:
@@ -92,27 +78,39 @@ class VisionApp:
 
             # ペイロード作成
             payload = {
-                "image_base64": b64_data,
-                "mode": selected_mode
+                "image_base64": b64_data
             }
 
             # 送信
-            response = requests.post(API_URL, json=payload, headers=auth_headers())
-            
+            response = requests.post(DETECT_ENDPOINT, json=payload, headers=auth_headers(API_URL))
+
             if response.status_code == 200:
                 data = response.json()
-                results = data.get("results", [])
-                
+                landmarks = data.get("landmarks", [])
+                image_size = data.get("image_size", {})
+                inference_ms = data.get("inference_ms", 0)
+
                 self.result_text.delete("1.0", tk.END)
-                self.result_text.insert(tk.END, "【判定結果】\n" + "-" * 40 + "\n")
-                
-                if not results:
-                    self.result_text.insert(tk.END, "結果なし（判定できませんでした）\n")
-                
-                for item in results:
-                    desc = item.get('description', '')
-                    score = item.get('score', '')
-                    self.result_text.insert(tk.END, f"・{desc}  [{score}]\n")
+                self.result_text.insert(tk.END, "【検出結果】\n" + "-" * 50 + "\n")
+                self.result_text.insert(tk.END, f"画像サイズ: {image_size.get('width')}x{image_size.get('height')}\n")
+                self.result_text.insert(tk.END, f"推論時間: {inference_ms}ms\n")
+                self.result_text.insert(tk.END, f"ランドマーク数: {len(landmarks)}\n\n")
+
+                if not landmarks:
+                    self.result_text.insert(tk.END, "姿勢が検出できませんでした\n")
+                else:
+                    self.result_text.insert(tk.END, "主要なランドマーク:\n")
+                    # Display key landmarks
+                    key_landmarks = ["NOSE", "LEFT_SHOULDER", "RIGHT_SHOULDER",
+                                   "LEFT_ELBOW", "RIGHT_ELBOW", "LEFT_WRIST", "RIGHT_WRIST",
+                                   "LEFT_HIP", "RIGHT_HIP", "LEFT_KNEE", "RIGHT_KNEE"]
+                    for lm in landmarks:
+                        if lm.get("name") in key_landmarks:
+                            name = lm.get("name", "")
+                            x = lm.get("x", 0)
+                            y = lm.get("y", 0)
+                            vis = lm.get("visibility", 0)
+                            self.result_text.insert(tk.END, f"  {name}: ({x:.3f}, {y:.3f}) 信頼度:{vis:.2f}\n")
             else:
                 self.result_text.insert(tk.END, f"エラー発生: {response.status_code}\n{response.text}")
 
@@ -123,7 +121,5 @@ class VisionApp:
 
 if __name__ == "__main__":
     root = tk.Tk()
-    app = VisionApp(root)
+    app = PoseDetectionApp(root)
     root.mainloop()
-
-    

@@ -27,5 +27,20 @@ def get_id_token() -> str:
         stderr=subprocess.STDOUT,
     ).strip()
 
-def auth_headers() -> dict:
+def auth_headers(api_url: str = None) -> dict:
+    """
+    Returns authentication headers for API requests.
+    For localhost, no authentication is required.
+    For Cloud Run, returns Bearer token with ID token.
+
+    Args:
+        api_url: The API URL to determine if authentication is needed
+
+    Returns:
+        dict: Headers dictionary (empty for localhost, with Bearer token for Cloud Run)
+    """
+    # Skip authentication for localhost
+    if api_url and ("localhost" in api_url or "127.0.0.1" in api_url):
+        return {}
+
     return {"Authorization": f"Bearer {get_id_token()}"}
